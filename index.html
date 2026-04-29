@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DE_L4 – Deutsch Lektion 4</title>
+<title>DE_L4_v8 – Fullscreen</title>
 <style>
 :root{
   --bg:#1a1f3a;--card:#242c56;--card2:#2e3870;--accent:#6c8fff;--accent2:#a78bfa;
@@ -72,6 +72,8 @@ textarea,input{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.
   .widget{width:calc(100vw - 24px);height:430px;left:12px;top:12px;max-height:calc(100dvh - 106px)}
 }
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1f3a">
 </head>
 <body>
 <div id="topbar">
@@ -85,6 +87,7 @@ textarea,input{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.
   <button type="button" class="tool-btn" data-open="build"><span>🎲</span><div class="label-de">Satzbau</div><div class="label-jp">文作り</div></button>
   <button type="button" class="tool-btn" data-open="timer"><span>⏱</span><div class="label-de">Timer</div><div class="label-jp">タイマー</div></button>
   <button type="button" class="tool-btn" data-open="qr"><span>📱</span><div class="label-de">QR-Code</div><div class="label-jp">QRコード</div></button>
+  <button type="button" class="tool-btn" id="fullscreenBtn" onclick="toggleFullscreen()"><span>⛶</span><div class="label-de">Vollbild</div><div class="label-jp">全画面</div></button>
 </div>
 <div id="desktop"><div id="hint">📘 Deutsch Lektion 4 – Im Restaurant<br><small>DE + 日本語 UI · Smart Quiz · Audio: Artikel + Wort.</small></div></div>
 <div id="toast"></div>
@@ -142,7 +145,8 @@ const LESSONS = {
     build:[
       {parts:["ich","hätte","gern","Wasser"],answer:"Ich hätte gern Wasser."},
       {parts:["ich","hätte","gern","einen","Kaffee"],answer:"Ich hätte gern einen Kaffee."},
-      {parts:["Bringen","Sie","mir","bitte","Brot"],answer:"Bringen Sie mir bitte Brot."}
+      {parts:["Bringen","Sie","mir","bitte","Brot"],answer:"Bringen Sie mir bitte Brot."},
+      {parts:["Ich","bestelle","Brot"],answer:"Ich bestelle Brot."}
     ]
   }
 };
@@ -314,10 +318,25 @@ function buildContent(type,body){
     body.innerHTML=`<div class="lesson-title">✏️ Schreiben</div><div class="card">Aufgabe: Schreibe den deutschen Satz ab.</div><div class="card"><div class="jp">${lesson.sentences[0].jp}</div><div class="de">${lesson.sentences[0].de}</div></div><textarea rows="8" placeholder="Hier schreiben..."></textarea><div class="btnrow"><button class="wbtn primary" onclick="speak('${lesson.sentences[0].de}')">🔊 hören</button><button class="wbtn" onclick="this.closest('.widget-body').querySelector('textarea').value=''">Löschen</button></div>`;
   }
   if(type==='build'){
-    let b=lesson.build[Math.floor(Math.random()*lesson.build.length)];
-    const parts=shuffle(b.parts);
-    body.innerHTML=`<div class="lesson-title">🎲 Satzbau</div><div class="card"><div class="muted">Baue den Satz:</div><div class="btnrow">${parts.map(p=>`<button class="wbtn part">${p}</button>`).join('')}</div></div><textarea id="buildOut" rows="3" placeholder="Wörter antippen..."></textarea><div class="btnrow"><button class="wbtn primary" onclick="document.getElementById('buildOut').value='${b.answer.replaceAll("'","\\'")}'">Lösung</button><button class="wbtn" onclick="speak('${b.answer.replaceAll("'","\\'")}')">🔊</button></div>`;
-    body.querySelectorAll('.part').forEach(btn=>btn.onclick=()=>{const o=body.querySelector('#buildOut');o.value+=(o.value?' ':'')+btn.textContent});
+    let bi = 0;
+    const renderBuild = () => {
+      const b = lesson.build[bi % lesson.build.length];
+      const parts = shuffle(b.parts);
+      body.innerHTML=`<div class="lesson-title">🎲 Satzbau</div>
+        <div class="muted">Übung ${bi+1} / ${lesson.build.length}</div>
+        <div class="card"><div class="muted">Baue den Satz:</div><div class="btnrow">${parts.map(p=>`<button class="wbtn part">${p}</button>`).join('')}</div></div>
+        <textarea id="buildOut" rows="3" placeholder="Wörter antippen..."></textarea>
+        <div class="btnrow">
+          <button class="wbtn primary" id="buildSolution">Lösung</button>
+          <button class="wbtn" id="buildSpeak">🔊</button>
+          <button class="wbtn" id="buildNext">Weiter</button>
+        </div>`;
+      body.querySelectorAll('.part').forEach(btn=>btn.onclick=()=>{const o=body.querySelector('#buildOut');o.value+=(o.value?' ':'')+btn.textContent});
+      body.querySelector('#buildSolution').onclick=()=>{body.querySelector('#buildOut').value=b.answer};
+      body.querySelector('#buildSpeak').onclick=()=>speak(b.answer,'de-DE',.62);
+      body.querySelector('#buildNext').onclick=()=>{bi=(bi+1)%lesson.build.length;renderBuild();};
+    };
+    renderBuild();
   }
   if(type==='timer'){
     body.innerHTML=`<div class="lesson-title">⏱ Timer</div><div class="big" id="timerNum">05:00</div><div class="btnrow"><button class="wbtn primary" id="tStart">Start</button><button class="wbtn" id="tReset">Reset</button></div>`;
@@ -350,6 +369,20 @@ function repeatSpeak(text){
   setTimeout(()=>speak(text,'de-DE',.62),2600);
   setTimeout(()=>speak(text,'de-DE',.62),5200);
 }
+function toggleFullscreen(){
+  const doc=document;
+  const el=doc.documentElement;
+  try{
+    if(!doc.fullscreenElement && !doc.webkitFullscreenElement){
+      const req=el.requestFullscreen || el.webkitRequestFullscreen;
+      if(req){ req.call(el); showToast('Vollbild aktiviert'); }
+      else { showToast('Vollbild ist hier nicht verfügbar'); }
+    }else{
+      const exit=doc.exitFullscreen || doc.webkitExitFullscreen;
+      if(exit){ exit.call(doc); showToast('Vollbild beendet'); }
+    }
+  }catch(e){ showToast('Vollbild ist hier nicht verfügbar'); }
+}
 function bindLauncherButtons(){
   document.querySelectorAll('.tool-btn[data-open]').forEach(btn=>{
     const open=()=>spawnWidget(btn.dataset.open);
@@ -358,14 +391,10 @@ function bindLauncherButtons(){
   });
 }
 bindLauncherButtons();
+const fsBtn=document.getElementById('fullscreenBtn');
+if(fsBtn){ fsBtn.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); toggleFullscreen(); }, {passive:false}); }
 window.addEventListener('resize',()=>document.querySelectorAll('.widget').forEach(fitScale));
 </script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-  });
-}
-</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));}</script>
 </body>
 </html>
