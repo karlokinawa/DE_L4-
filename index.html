@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DE_L4 – Deutsch Lektion 4</title>
+<style>
+:root{
+  --bg:#1a1f3a;--card:#242c56;--card2:#2e3870;--accent:#6c8fff;--accent2:#a78bfa;
+  --text:#eef0ff;--muted:#9aa3c8;--green:#4ade80;--red:#f87171;--yellow:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Hiragino Sans","Yu Gothic",sans-serif;color:var(--text);background:var(--bg)}
+body{background-image:radial-gradient(rgba(108,143,255,.14) 1px,transparent 1px);background-size:28px 28px}
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:88px;z-index:9999;
+  display:flex;align-items:center;gap:7px;padding:8px 10px;overflow-x:auto;overflow-y:hidden;
+  background:rgba(29,35,71,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.10)
+}
+.tool-btn{
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  flex:0 0 auto;width:76px;height:70px;border-radius:12px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.08);color:var(--text);font-size:10px;font-weight:800;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer
+}
+.tool-btn span{font-size:23px}
+.label-de{font-size:10px;line-height:1;font-weight:900}
+.label-jp{font-size:10px;line-height:1;color:#ffd68a;font-weight:800;opacity:.92}
+.tool-btn:active{transform:scale(.96)}
+#desktop{position:fixed;left:0;right:0;top:88px;bottom:0;overflow:hidden}
+#hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(238,240,255,.45);font-weight:700;font-size:18px;pointer-events:none}
+.widget{
+  position:absolute;left:14px;top:14px;width:340px;height:420px;max-width:calc(100vw - 24px);
+  max-height:calc(100dvh - 106px);min-width:230px;min-height:160px;
+  background:rgba(36,44,86,.93);border:1px solid rgba(255,255,255,.14);border-radius:16px;
+  box-shadow:0 10px 34px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden
+}
+.widget-header{height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:rgba(0,0,0,.22);cursor:grab;user-select:none}
+.widget-title{font-size:12px;font-weight:900;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close{border:none;background:transparent;color:var(--muted);font-size:20px;padding:3px 8px;cursor:pointer}
+.widget-body{flex:1;overflow:auto;padding:14px;font-size:clamp(14px,calc(var(--scale,1)*15px),28px);line-height:1.55}
+.resize{position:absolute;right:0;bottom:0;width:38px;height:38px;z-index:5;cursor:se-resize;display:flex;align-items:flex-end;justify-content:flex-end;padding:7px;color:rgba(255,255,255,.65)}
+.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:14px;margin:10px 0}
+.big{font-size:2.1em;font-weight:900;text-align:center;margin:10px 0;line-height:1.15}
+.jp{color:#ffd68a;font-weight:800}
+.de{color:#fff;font-weight:900}
+.kana{color:#aee3ff;font-weight:700}
+.muted{color:var(--muted)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.wbtn{border:none;border-radius:10px;background:var(--card2);color:var(--text);font-weight:850;padding:.6em .85em;cursor:pointer;font-size:.95em}
+.wbtn.primary{background:var(--accent)}
+.wbtn.good{background:#176b3a}
+.wbtn.bad{background:#7a2424}
+.lesson-title{font-size:1.4em;font-weight:900;color:var(--accent2);margin-bottom:8px}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td,th{border-bottom:1px solid rgba(255,255,255,.1);padding:8px;text-align:left;vertical-align:top}
+textarea,input{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#fff;color:#111;padding:12px;font-size:1em;line-height:1.5}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 16px;border-radius:999px;z-index:20000;font-weight:800;display:none}
+
+.widget-quiz .widget-body{overflow:auto;padding:12px}
+.widget-quiz .lesson-title{font-size:1.35em;margin-bottom:4px}
+.quiz-card{margin:8px 0;padding:12px}
+.quiz-answer-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:8px}
+.quiz-answer-row .wbtn{margin:0}
+.quiz-feedback{margin-top:10px;padding:10px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+@media(max-width:600px){.widget-quiz{height:min(540px,calc(100dvh - 112px))!important}.widget-quiz .widget-body{font-size:18px}.widget-quiz .big{margin:4px 0}}
+@media(max-width:600px){
+  #topbar{height:88px}
+  #desktop{top:88px}
+  .tool-btn{width:70px;height:68px;font-size:9px}
+  .widget{width:calc(100vw - 24px);height:430px;left:12px;top:12px;max-height:calc(100dvh - 106px)}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <button type="button" class="tool-btn" data-open="lesson"><span>📘</span><div class="label-de">Lektion</div><div class="label-jp">レッスン</div></button>
+  <button type="button" class="tool-btn" data-open="words"><span>🗣️</span><div class="label-de">Wörter</div><div class="label-jp">単語</div></button>
+  <button type="button" class="tool-btn" data-open="sentences"><span>💬</span><div class="label-de">Sätze</div><div class="label-jp">文</div></button>
+  <button type="button" class="tool-btn" data-open="grammar"><span>📐</span><div class="label-de">Grammatik</div><div class="label-jp">文法</div></button>
+  <button type="button" class="tool-btn" data-open="quiz"><span>✅</span><div class="label-de">Quiz</div><div class="label-jp">クイズ</div></button>
+  <button type="button" class="tool-btn" data-open="listen"><span>🔊</span><div class="label-de">Hören</div><div class="label-jp">聞く</div></button>
+  <button type="button" class="tool-btn" data-open="write"><span>✏️</span><div class="label-de">Schreiben</div><div class="label-jp">書く</div></button>
+  <button type="button" class="tool-btn" data-open="build"><span>🎲</span><div class="label-de">Satzbau</div><div class="label-jp">文作り</div></button>
+  <button type="button" class="tool-btn" data-open="timer"><span>⏱</span><div class="label-de">Timer</div><div class="label-jp">タイマー</div></button>
+  <button type="button" class="tool-btn" data-open="qr"><span>📱</span><div class="label-de">QR-Code</div><div class="label-jp">QRコード</div></button>
+</div>
+<div id="desktop"><div id="hint">📘 Deutsch Lektion 4 – Im Restaurant<br><small>DE + 日本語 UI · Smart Quiz · Audio: Artikel + Wort.</small></div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+const LESSONS = {
+  4: {
+    title:"Lektion 4 – Im Restaurant",
+    subtitle:"Deutsch lernen für Japaner",
+    vocab:[
+      {jp:"コーヒー",de:"der Kaffee",kana:"デア・カフェー",plain:"Kaffee"},
+      {jp:"水",de:"das Wasser",kana:"ダス・ヴァッサー",plain:"Wasser"},
+      {jp:"パン",de:"das Brot",kana:"ダス・ブロート",plain:"Brot"},
+      {jp:"注文する",de:"bestellen",kana:"ベシュテレン",plain:"bestellen"},
+      {jp:"持ってくる",de:"bringen",kana:"ブリンゲン",plain:"bringen"},
+      {jp:"お願いします",de:"bitte",kana:"ビッテ",plain:"bitte"}
+    ],
+    sentences:[
+      {jp:"コーヒーを一杯お願いします。",de:"Ich hätte gern einen Kaffee.",kana:"イヒ・ヘッテ・ゲルン・アイネン・カフェー"},
+      {jp:"水をお願いします。",de:"Ich hätte gern Wasser.",kana:"イヒ・ヘッテ・ゲルン・ヴァッサー"},
+      {jp:"パンを持ってきてください。",de:"Bringen Sie mir bitte Brot.",kana:"ブリンゲン・ズィー・ミア・ビッテ・ブロート"},
+      {jp:"私はパンを注文します。",de:"Ich bestelle Brot.",kana:"イヒ・ベシュテレ・ブロート"}
+    ],
+    grammar:[
+      {
+        title:"丁寧な注文表現: ich hätte gern ...",
+        de:"ich hätte gern + Objekt",
+        jp:"「〜をお願いします」という丁寧な言い方です。日本語の「ください」に近いですが、ドイツ語ではとても自然で礼儀正しい表現です。",
+        examples:["Ich hätte gern einen Kaffee.","Ich hätte gern Wasser.","Ich hätte gern Brot."]
+      },
+      {
+        title:"なぜ einen Kaffee?",
+        de:"der Kaffee → einen Kaffee",
+        jp:"Kaffee は男性名詞 der Kaffee です。『一杯のコーヒーを』のように目的語になると einen Kaffee になります。",
+        examples:["der Kaffee","Ich hätte gern einen Kaffee."]
+      },
+      {
+        title:"bitte の位置",
+        de:"Bringen Sie mir bitte Brot.",
+        jp:"bitte は文の中に入れて、ていねいさを出します。命令形でも bitte を入れると自然です。",
+        examples:["Bringen Sie mir bitte Wasser.","Bringen Sie mir bitte Brot."]
+      }
+    ],
+    quiz:[
+      {type:"Wörter", q:"水 = ?", a:["das Wasser","der Kaffee","das Brot"], ok:0, speak:"das Wasser", hint:"Artikel + Wort zusammen lernen: das Wasser."},
+      {type:"Wörter", q:"コーヒー = ?", a:["der Kaffee","das Wasser","bestellen"], ok:0, speak:"der Kaffee", hint:"Kaffee ist maskulin: der Kaffee."},
+      {type:"Wörter", q:"パン = ?", a:["das Brot","bitte","bringen"], ok:0, speak:"das Brot", hint:"Brot ist neutral: das Brot."},
+      {type:"Sätze", q:"「水をお願いします。」はドイツ語で？", a:["Ich hätte gern Wasser.","Ich bin Wasser.","Ich gehe Wasser."], ok:0, speak:"Ich hätte gern Wasser.", hint:"Im Restaurant ist „Ich hätte gern ...“ sehr höflich."},
+      {type:"Sätze", q:"「コーヒーを一杯お願いします。」は？", a:["Ich hätte gern einen Kaffee.","Ich bestelle Wasser.","Bringen Sie Brot."], ok:0, speak:"Ich hätte gern einen Kaffee.", hint:"der Kaffee wird hier zu einen Kaffee."},
+      {type:"Grammatik", q:"Ich hätte gern ___ Kaffee.", a:["einen","ein","eine"], ok:0, speak:"Ich hätte gern einen Kaffee.", hint:"der Kaffee → einen Kaffee, weil es hier ein Akkusativ-Objekt ist."},
+      {type:"Grammatik", q:"Welche Form ist höflich und natürlich im Restaurant?", a:["Ich hätte gern Wasser.","Ich will Wasser.","Ich bin Wasser."], ok:0, speak:"Ich hätte gern Wasser.", hint:"„Ich will ...“ ist oft zu direkt. Besser: Ich hätte gern ..."},
+      {type:"Hören", q:"Höre und wähle: „Bringen Sie mir bitte Brot.“", a:["パンを持ってきてください。","水をお願いします。","コーヒーをお願いします。"], ok:0, speak:"Bringen Sie mir bitte Brot.", hint:"bringen = 持ってくる, bitte = お願いします。"},
+      {type:"Satzbau", q:"Richtiger Satz? ich / hätte / gern / Wasser", a:["Ich hätte gern Wasser.","Ich gern hätte Wasser.","Wasser hätte ich gern ich."], ok:0, speak:"Ich hätte gern Wasser.", hint:"Normale Reihenfolge: Ich + hätte + gern + Objekt."}
+    ],
+    build:[
+      {parts:["ich","hätte","gern","Wasser"],answer:"Ich hätte gern Wasser."},
+      {parts:["ich","hätte","gern","einen","Kaffee"],answer:"Ich hätte gern einen Kaffee."},
+      {parts:["Bringen","Sie","mir","bitte","Brot"],answer:"Bringen Sie mir bitte Brot."}
+    ]
+  }
+};
+let currentLesson = 4;
+let zTop=20, counter=0;
+const desktop=document.getElementById('desktop');
+
+function L(){return LESSONS[currentLesson];}
+function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',1300)}
+function speak(text, lang='de-DE', rate=.72){
+  if(!('speechSynthesis' in window)){showToast('Keine Browser-Stimme verfügbar');return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate;u.pitch=1;u.volume=1;
+  speechSynthesis.speak(u);
+}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function fitScale(el){
+  const w=el.offsetWidth||320,h=el.offsetHeight||320;
+  el.style.setProperty('--scale', Math.max(.85, Math.min(2.2, Math.min(w/320,h/300))).toFixed(2));
+}
+function stackPos(){
+  const open=[...desktop.querySelectorAll('.widget')].length;
+  const isMobile = window.innerWidth <= 700;
+  if(isMobile){
+    // Mobile Stack Fix: alle Widgets linksbündig, nur nach unten versetzt.
+    const left = 12;
+    const stepY = 42;
+    let top = 12 + open * stepY;
+    const maxTop = Math.max(12, desktop.clientHeight - 220);
+    if(top > maxTop) top = 12 + (open % 4) * stepY;
+    return {left, top};
+  }
+  // PC: leichter diagonaler Versatz bleibt angenehm.
+  const step=28, left=20+open*step, top=18+open*step;
+  const maxL=Math.max(12, desktop.clientWidth-320), maxT=Math.max(12, desktop.clientHeight-220);
+  return {left: Math.min(left,maxL), top: Math.min(top,maxT)};
+}
+const titles={
+  lesson:"📘 Lektion", words:"🗣️ Wörter", sentences:"💬 Sätze", grammar:"📐 Grammatik", quiz:"✅ Quiz",
+  listen:"🔊 Hören", write:"✏️ Schreiben", build:"🎲 Satzbau", timer:"⏱ Timer", qr:"📱 QR-Code"
+};
+function spawnWidget(type){
+  document.getElementById('hint').style.display='none';
+  const id='w'+(++counter), p=stackPos();
+  const el=document.createElement('div'); el.className='widget widget-'+type; el.dataset.type=type; el.id=id; el.style.zIndex=++zTop;
+  el.style.left=p.left+'px'; el.style.top=p.top+'px';
+  if(type==='lesson'){
+    const lw = Math.min(window.innerWidth - 24, 440);
+    const lh = Math.min(window.innerHeight - 130, 560);
+    el.style.width = Math.max(360, lw) + 'px';
+    el.style.height = Math.max(500, lh) + 'px';
+    el.style.left = '12px';
+    el.style.top = '12px';
+  }
+  if(type==='grammar'){el.style.width='390px';el.style.height='500px'}
+  if(type==='quiz'){el.style.width='360px';el.style.height='540px'}
+  if(type==='write'){el.style.width='420px';el.style.height='480px'}
+  if(type==='qr'){
+    const qw = Math.min(window.innerWidth - 24, 440);
+    const qh = Math.min(window.innerHeight - 110, 560);
+    el.style.width = Math.max(330, qw) + 'px';
+    el.style.height = Math.max(470, qh) + 'px';
+    el.style.left = '12px';
+    el.style.top = '12px';
+  }
+  el.innerHTML=`<div class="widget-header"><div class="widget-title">${titles[type]||type}</div><button class="close" onclick="this.closest('.widget').remove();checkHint()">×</button></div><div class="widget-body"></div><div class="resize">◢</div>`;
+  desktop.appendChild(el);
+  makeDrag(el,el.querySelector('.widget-header')); makeResize(el,el.querySelector('.resize'));
+  buildContent(type,el.querySelector('.widget-body'));
+  fitScale(el); return el;
+}
+function checkHint(){if(!desktop.querySelector('.widget'))document.getElementById('hint').style.display='flex'}
+function makeDrag(el,handle){
+  const start=(x,y)=>{el.style.zIndex=++zTop; const ox=parseFloat(el.style.left),oy=parseFloat(el.style.top);
+    const move=(x2,y2)=>{el.style.left=Math.max(0,Math.min(desktop.clientWidth-60,ox+x2-x))+'px';el.style.top=Math.max(0,Math.min(desktop.clientHeight-40,oy+y2-y))+'px'};
+    return move;
+  };
+  let mv=null;
+  handle.addEventListener('mousedown',e=>{if(e.button!==0)return; e.preventDefault(); mv=start(e.clientX,e.clientY);
+    const mm=e=>mv(e.clientX,e.clientY), up=()=>{document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',up)};
+    document.addEventListener('mousemove',mm);document.addEventListener('mouseup',up);
+  });
+  handle.addEventListener('touchstart',e=>{const t=e.touches[0]; mv=start(t.clientX,t.clientY);
+    const mm=e=>{const t=e.touches[0]; if(t)mv(t.clientX,t.clientY)}, up=()=>{document.removeEventListener('touchmove',mm);document.removeEventListener('touchend',up)};
+    document.addEventListener('touchmove',mm,{passive:false});document.addEventListener('touchend',up);
+  },{passive:true});
+}
+function makeResize(el,handle){
+  const begin=(x,y)=>{el.style.zIndex=++zTop; const sw=el.offsetWidth, sh=el.offsetHeight;
+    return (x2,y2)=>{const maxW=desktop.clientWidth-(parseFloat(el.style.left)||0)-6,maxH=desktop.clientHeight-(parseFloat(el.style.top)||0)-6;
+      el.style.width=Math.max(230,Math.min(maxW,sw+x2-x))+'px'; el.style.height=Math.max(160,Math.min(maxH,sh+y2-y))+'px'; fitScale(el);}
+  };
+  let mv=null;
+  handle.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();mv=begin(e.clientX,e.clientY);
+    const mm=e=>mv(e.clientX,e.clientY), up=()=>{document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',up)};
+    document.addEventListener('mousemove',mm);document.addEventListener('mouseup',up);
+  });
+  handle.addEventListener('touchstart',e=>{e.preventDefault(); const t=e.touches[0]; mv=begin(t.clientX,t.clientY);
+    const mm=e=>{e.preventDefault();const t=e.touches[0];if(t)mv(t.clientX,t.clientY)}, up=()=>{document.removeEventListener('touchmove',mm);document.removeEventListener('touchend',up)};
+    document.addEventListener('touchmove',mm,{passive:false});document.addEventListener('touchend',up);
+  },{passive:false});
+}
+function buildContent(type,body){
+  const lesson=L();
+  if(type==='lesson'){
+    body.innerHTML=`<div class="lesson-title">${lesson.title}</div><div class="muted">${lesson.subtitle}</div>
+    <div class="card">このアプリは、日本人向けのドイツ語学習テンプレートです。現在は Musterlektion として「Restaurant」だけを入れています。</div>
+    <table><tr><th>Bereich</th><th>Inhalt</th></tr>
+    <tr><td>🗣️ Wörter</td><td>${lesson.vocab.length} Wörter</td></tr>
+    <tr><td>💬 Sätze</td><td>${lesson.sentences.length} Sätze</td></tr>
+    <tr><td>📐 Grammatik</td><td>${lesson.grammar.length} Punkte</td></tr>
+    <tr><td>✅ Quiz</td><td>${lesson.quiz.length} Fragen</td></tr></table>`;
+  }
+  if(type==='words'){
+    let i=0; const render=()=>{const v=lesson.vocab[i%lesson.vocab.length]; body.innerHTML=`<div class="muted">${lesson.title}</div><div class="card"><div class="jp">🇯🇵 ${v.jp}</div><div class="big de">${v.de}</div><div class="kana">発音: ${v.kana}</div><div class="muted" style="margin-top:6px">Audio: Artikel + Wort</div></div><div class="btnrow"><button class="wbtn primary" onclick="speak('${v.de.replaceAll("'","\\'")}', 'de-DE', .62)">🔊 Artikel + Wort</button><button class="wbtn" id="nextWord">次へ</button></div>`; body.querySelector('#nextWord').onclick=()=>{i++;render()};};
+    render();
+  }
+  if(type==='sentences'){
+    body.innerHTML=`<div class="lesson-title">Sätze</div>`+lesson.sentences.map(s=>`<div class="card"><div class="jp">${s.jp}</div><div class="de">${s.de}</div><div class="kana">発音: ${s.kana}</div><button class="wbtn primary" onclick="speak('${s.de.replaceAll("'","\\'")}')">🔊 langsam</button></div>`).join('');
+  }
+  if(type==='grammar'){
+    body.innerHTML=`<div class="lesson-title">📐 Grammatik – ${lesson.title}</div>`+lesson.grammar.map(g=>`<div class="card"><div class="jp">${g.title}</div><div class="big" style="font-size:1.25em">${g.de}</div><p>${g.jp}</p><ul style="margin-left:1.2em;margin-top:8px">${g.examples.map(ex=>`<li><span class="de">${ex}</span> <button class="wbtn" style="padding:.2em .5em" onclick="speak('${ex.replaceAll("'","\\'")}')">🔊</button></li>`).join('')}</ul></div>`).join('');
+  }
+  if(type==='quiz'){
+    let idx=0, score=0, locked=false;
+    const render=()=>{
+      locked=false;
+      const q=lesson.quiz[idx%lesson.quiz.length];
+      body.innerHTML=`<div class="lesson-title">✅ Smart Quiz</div>
+        <div class="muted">Frage ${idx+1} / ${lesson.quiz.length} · Punkte: ${score}</div>
+        <div class="card quiz-card" style="border-color:rgba(108,143,255,.35)">
+          <div style="display:inline-block;background:rgba(108,143,255,.18);border:1px solid rgba(108,143,255,.35);border-radius:999px;padding:.20em .65em;font-weight:900;margin-bottom:6px">${q.type}</div>
+          <div class="big" style="font-size:1.05em;text-align:left">${q.q}</div>
+          <div class="quiz-answer-row">${q.a.map((a,j)=>`<button class="wbtn" data-j="${j}" style="text-align:left">${String.fromCharCode(65+j)}. ${a}</button>`).join('')}</div>
+          <div class="quiz-feedback" id="quizFeedback" style="display:none"></div>
+        </div>
+        <div class="btnrow">
+          <button class="wbtn" id="quizHear">🔊 Frage hören</button>
+          <button class="wbtn" id="quizSkip">Weiter</button>
+          <button class="wbtn" id="quizRestart">Neu starten</button>
+        </div>`;
+      body.querySelector('#quizHear').onclick=()=>speak(q.speak || q.q, 'de-DE', .62);
+      body.querySelector('#quizSkip').onclick=()=>{idx=(idx+1)%lesson.quiz.length;render()};
+      body.querySelector('#quizRestart').onclick=()=>{idx=0;score=0;render()};
+      body.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{
+        if(locked) return; locked=true;
+        const chosen=Number(b.dataset.j), ok=chosen===q.ok;
+        body.querySelectorAll('[data-j]').forEach(x=>{
+          const isCorrect=Number(x.dataset.j)===q.ok;
+          if(isCorrect) x.classList.add('good');
+          if(x===b && !ok) x.classList.add('bad');
+        });
+        if(ok){score++;showToast('Richtig ✅');} else {showToast('Noch einmal anschauen ❌');}
+        const fb=body.querySelector('#quizFeedback');
+        fb.style.display='block';
+        fb.innerHTML=`<div style="font-weight:900;color:${ok?'var(--green)':'var(--red)'}">${ok?'Richtig ✅':'Noch nicht richtig ❌'} <span class="de">${q.a[q.ok]}</span></div>
+          <div class="jp" style="margin-top:4px;font-size:.88em">${q.hint||''}</div>
+          <div class="btnrow" style="margin-top:8px"><button class="wbtn primary" id="fbSpeak">🔊 Antwort</button><button class="wbtn" id="fbNext">Nächste</button></div>`;
+        fb.querySelector('#fbSpeak').onclick=()=>speak(q.speak || q.a[q.ok], 'de-DE', .62);
+        fb.querySelector('#fbNext').onclick=()=>{idx=(idx+1)%lesson.quiz.length;render()};
+        if(q.speak) speak(q.speak, 'de-DE', .62);
+      });
+    }; render();
+  }
+  if(type==='listen'){
+    body.innerHTML=`<div class="lesson-title">🔊 Hören / Shadowing</div><div class="card">1. Hören<br>2. Nachsprechen<br>3. Noch einmal hören</div>`+lesson.sentences.map(s=>`<div class="card"><div class="de">${s.de}</div><div class="jp">${s.jp}</div><div class="btnrow"><button class="wbtn primary" onclick="speak('${s.de.replaceAll("'","\\'")}', 'de-DE', .62)">🔊 langsam</button><button class="wbtn" onclick="repeatSpeak('${s.de.replaceAll("'","\\'")}')">🔁 3×</button></div></div>`).join('');
+  }
+  if(type==='write'){
+    body.innerHTML=`<div class="lesson-title">✏️ Schreiben</div><div class="card">Aufgabe: Schreibe den deutschen Satz ab.</div><div class="card"><div class="jp">${lesson.sentences[0].jp}</div><div class="de">${lesson.sentences[0].de}</div></div><textarea rows="8" placeholder="Hier schreiben..."></textarea><div class="btnrow"><button class="wbtn primary" onclick="speak('${lesson.sentences[0].de}')">🔊 hören</button><button class="wbtn" onclick="this.closest('.widget-body').querySelector('textarea').value=''">Löschen</button></div>`;
+  }
+  if(type==='build'){
+    let b=lesson.build[Math.floor(Math.random()*lesson.build.length)];
+    const parts=shuffle(b.parts);
+    body.innerHTML=`<div class="lesson-title">🎲 Satzbau</div><div class="card"><div class="muted">Baue den Satz:</div><div class="btnrow">${parts.map(p=>`<button class="wbtn part">${p}</button>`).join('')}</div></div><textarea id="buildOut" rows="3" placeholder="Wörter antippen..."></textarea><div class="btnrow"><button class="wbtn primary" onclick="document.getElementById('buildOut').value='${b.answer.replaceAll("'","\\'")}'">Lösung</button><button class="wbtn" onclick="speak('${b.answer.replaceAll("'","\\'")}')">🔊</button></div>`;
+    body.querySelectorAll('.part').forEach(btn=>btn.onclick=()=>{const o=body.querySelector('#buildOut');o.value+=(o.value?' ':'')+btn.textContent});
+  }
+  if(type==='timer'){
+    body.innerHTML=`<div class="lesson-title">⏱ Timer</div><div class="big" id="timerNum">05:00</div><div class="btnrow"><button class="wbtn primary" id="tStart">Start</button><button class="wbtn" id="tReset">Reset</button></div>`;
+    let sec=300, int=null; const upd=()=>body.querySelector('#timerNum').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+    body.querySelector('#tStart').onclick=()=>{if(int)return;int=setInterval(()=>{sec--;upd();if(sec<=0){clearInterval(int);int=null;speak('Fertig','de-DE',.8)}},1000)};
+    body.querySelector('#tReset').onclick=()=>{clearInterval(int);int=null;sec=300;upd()}; upd();
+  }
+  if(type==='qr'){
+    const lessonUrl = 'https://karlokinawa.github.io/DE_L4/';
+    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=10&data=' + encodeURIComponent(lessonUrl);
+    body.style.overflow = 'hidden';
+    body.style.padding = '10px';
+    body.innerHTML = `
+      <div class="lesson-title" style="font-size:1.15em;margin-bottom:6px;text-align:center">📱 QR – ${lesson.title}</div>
+      <div class="card" style="text-align:center;margin:6px 0;padding:10px;height:calc(100% - 88px);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden">
+        <div style="font-weight:900;margin-bottom:8px;font-size:1em">Schüler scannen diesen Code:</div>
+        <img src="${qrUrl}" alt="QR-Code Lektion 4" style="width:min(92%, calc(100vh - 310px), 390px);max-width:390px;min-width:240px;aspect-ratio:1/1;background:#fff;border-radius:14px;padding:10px;display:block;margin:0 auto 8px;object-fit:contain;">
+        <div class="muted" style="font-size:.75em;margin-bottom:4px">${lessonUrl}</div>
+      </div>
+      <div class="btnrow" style="justify-content:center;margin-top:6px">
+        <button class="wbtn primary" id="copyLessonLink">🔗 Kopieren</button>
+        <button class="wbtn" id="openLessonLink">🌐 Öffnen</button>
+      </div>`;
+    body.querySelector('#copyLessonLink').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(lessonUrl); showToast('Lektions-Link kopiert'); };
+    body.querySelector('#openLessonLink').onclick = () => window.open(lessonUrl, '_blank');
+  }
+}
+function repeatSpeak(text){
+  speak(text,'de-DE',.62);
+  setTimeout(()=>speak(text,'de-DE',.62),2600);
+  setTimeout(()=>speak(text,'de-DE',.62),5200);
+}
+function bindLauncherButtons(){
+  document.querySelectorAll('.tool-btn[data-open]').forEach(btn=>{
+    const open=()=>spawnWidget(btn.dataset.open);
+    btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); open(); });
+    btn.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); open(); }, {passive:false});
+  });
+}
+bindLauncherButtons();
+window.addEventListener('resize',()=>document.querySelectorAll('.widget').forEach(fitScale));
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
